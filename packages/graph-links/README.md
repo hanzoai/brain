@@ -58,7 +58,7 @@ registerGraph(api);
 ## Tests
 
 ```bash
-cd ~/work/hanzo/bot && bun test extensions/graph-links
+cd ~/work/hanzo/brain/packages/graph-links && bun test
 ```
 
 12 unit tests cover: slugify, markdown links, meeting-page → `attended`, FOUNDED, INVESTED_IN (`invested in`, `led X's seed`), ADVISES (`advisor to`), WORKS_AT (`CEO of`, `joined Y`), code-fence stripping, dedup, bare slug refs, reconcile add/remove.

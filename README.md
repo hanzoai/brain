@@ -200,7 +200,7 @@ Five runtimes ship the same algorithm surface, byte-equivalent on the wire:
 - **TypeScript** — `@hanzo/bot-memory` (this monorepo, canonical)
 - **Python** — [`hanzo-memory`](https://github.com/hanzoai/python-sdk) (`hanzo_memory.algorithms`)
 - **Go** — [`hanzoai/bot-go`](https://github.com/hanzoai/bot-go) (`pkg/brain`)
-- **Rust** — [`hanzoai/node`](https://github.com/hanzoai/node) (`hanzo-libs/hanzo-brain`) and [`hanzoai/mcp`](https://github.com/hanzoai/mcp) (`hanzo_mcp::brain::algorithms`)
+- **Rust** — [`hanzoai/node`](https://github.com/hanzoai/node) (`hanzo-brain` workspace member) and [`hanzoai/mcp`](https://github.com/hanzoai/mcp) (`hanzo_mcp::brain::algorithms`)
 - **C++** — [`hanzoai/bot-cpp`](https://github.com/hanzoai/bot-cpp) (`include/hanzo/brain/algorithms.hpp`, header-only C++17)
 
 Pure-CPU algorithm modules in `packages/memory/` (mirrored in every runtime):

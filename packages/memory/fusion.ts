@@ -1,8 +1,5 @@
 /**
- * Result-list fusion strategies.
- *
- * The fortemi parity sweep splits fusion into four pieces so each can be
- * swapped independently:
+ * Result-list fusion strategies. Four pieces, each swappable independently:
  *
  *   - rrfFuse        — Reciprocal Rank Fusion (Cormack et al. 2009)
  *   - rsfFuse        — Relative Score Fusion (Weaviate v1.24, +6% over RRF

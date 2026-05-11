@@ -27,15 +27,15 @@ Native stack uses **ZAP** (zero-copy transport) + **hanzo-consensus** (metastabl
 agent agreement) + **zapdb** (storage primitives) end-to-end. No libSQL,
 no Turso — we ship our own.
 
-| Backend       | Repo                                                                   | License  | Use                                                                                                                                                                                                  |
-| ------------- | ---------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `qdrant`      | [`~/work/hanzo/vector`](../../../vector/)                              | Apache 2 | Vector ANN at scale (millions of embeddings, multi-replica)                                                                                                                                          |
-| `meilisearch` | [`~/work/hanzo/search`](../../../search/)                              | MIT      | Fast keyword FTS when SQLite FTS5 stops being enough                                                                                                                                                 |
-| `replicate`   | [`~/work/hanzo/replicate`](../../../replicate/)                        | Apache 2 | Background SQLite WAL → S3 backup, point-in-time restore                                                                                                                                             |
-| `vfs`         | [`~/work/hanzo/vfs`](../../../vfs/)                                    | Apache 2 | S3-backed virtual block FS with PQ encryption — unlimited write storage                                                                                                                              |
-| `zapdb`       | **`zap-proto/db`** (canonical, in-flight migration from `luxfi/zapdb`) | Apache 2 | The canonical Hanzo storage layer. ZAP-native primitives, multi-language. Currently mirrored at `luxfi/zapdb` (Go, badger-derived) and `~/work/luxcpp/zapdb` (C++) — both moving to `zap-proto/db`.  |
-| `luxdb`       | [`~/work/lux/database`](../../../../lux/database/)                     | BSD-3    | **Lux-flavored extension** of zapdb. Adds blockchain-specific concerns (chain heads, archival, validator sets) on top of the base zapdb. Don't use for generic brain stores — pick `zapdb` directly. |
-| `postgres`    | (sibling pkg)                                                          |          | Multi-tenant team brain with pgvector                                                                                                                                                                |
+| Backend       | Repo                                                                          | License  | Use                                                                                                                                                                                                  |
+| ------------- | ----------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `qdrant`      | [`hanzoai/vector`](https://github.com/hanzoai/vector)                         | Apache 2 | Vector ANN at scale (millions of embeddings, multi-replica)                                                                                                                                          |
+| `meilisearch` | [`hanzoai/search`](https://github.com/hanzoai/search)                         | MIT      | Fast keyword FTS when SQLite FTS5 stops being enough                                                                                                                                                 |
+| `replicate`   | [`hanzoai/replicate`](https://github.com/hanzoai/replicate)                   | Apache 2 | Background SQLite WAL → S3 backup, point-in-time restore                                                                                                                                             |
+| `vfs`         | [`hanzoai/vfs`](https://github.com/hanzoai/vfs)                               | Apache 2 | S3-backed virtual block FS with PQ encryption — unlimited write storage                                                                                                                              |
+| `zapdb`       | **[`zap-proto/db`](https://github.com/zap-proto/db)** (canonical)             | Apache 2 | The canonical Hanzo storage layer. ZAP-native primitives, multi-language. In-flight migration from `luxfi/zapdb` (Go, badger-derived) and `luxcpp/zapdb` (C++) into `zap-proto/db`.                  |
+| `luxdb`       | [`luxfi/database`](https://github.com/luxfi/database)                         | BSD-3    | **Lux-flavored extension** of zapdb. Adds blockchain-specific concerns (chain heads, archival, validator sets) on top of the base zapdb. Don't use for generic brain stores — pick `zapdb` directly. |
+| `postgres`    | (sibling pkg)                                                                 |          | Multi-tenant team brain with pgvector                                                                                                                                                                |
 
 ### The native distributed-SQL story (we ship our own — not libSQL/Turso)
 
@@ -148,7 +148,7 @@ Either works. The init step tries bun:sqlite first.
 ## Tests
 
 ```bash
-cd ~/work/hanzo/bot && bun test extensions/memory
+cd ~/work/hanzo/brain/packages/memory && bun test
 ```
 
-Covers: upsert + read pages, upsert + read edges, upsert + recall facts, FTS hybrid search, pluggability (register a stub backend), unknown-backend error message.
+109 tests across 3 files cover: SQLite store (upsert + read pages, upsert + read edges, upsert + recall facts, FTS hybrid search, pluggability via `registerBackend`, unknown-backend error), the full algorithm surface (`fusion`, `rerank`, `dedup`, `script`, `fts`, `embed`, `temporal`, `two-stage`, `federated`, `filters`, `multi-memory`, `graph`, `skos`, `fair`, `doc-types`, `code-ast`, `email`, `exif`, `captions`, `sprite`, `events`, `tokenizer`, `eval`, `hardware`, `circuit-breaker`, `retry`, `range`, `tus`, `spatial`, `address`, `mmpke01`), and the `Inference` / `Extract` sub-registries.
