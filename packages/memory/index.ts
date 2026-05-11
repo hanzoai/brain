@@ -32,7 +32,7 @@
 
 import type { Edge } from "@hanzo/bot-graph-links";
 
-// ── Algorithm modules (fortemi parity, see PARITY.md) ──────────────────
+// ── Algorithm modules ──────────────────────────────────────────────────
 // Retrieval
 export * from "./fusion.js";
 export * from "./rerank.js";

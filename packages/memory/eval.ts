@@ -21,7 +21,9 @@ function isGraded(r: QueryEval["relevant"]): r is Record<string, number> {
 }
 
 export function reciprocalRank(q: QueryEval): number {
-  const rel = isGraded(q.relevant) ? new Set(Object.keys(q.relevant).filter((k) => q.relevant[k as keyof typeof q.relevant] > 0)) : new Set(q.relevant);
+  const rel = isGraded(q.relevant)
+    ? new Set(Object.entries(q.relevant).filter(([, v]) => v > 0).map(([k]) => k))
+    : new Set(q.relevant);
   for (let i = 0; i < q.predicted.length; i++) {
     if (rel.has(q.predicted[i])) return 1 / (i + 1);
   }
