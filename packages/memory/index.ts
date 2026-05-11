@@ -32,6 +32,15 @@
 
 import type { Edge } from "@hanzo/bot-graph-links";
 
+// ── Algorithm modules (fortemi parity, see PARITY.md) ──────────────────
+export * from "./fusion.js";
+export * from "./rerank.js";
+export * from "./dedup.js";
+export * from "./script.js";
+export * from "./embed.js";
+export * from "./temporal.js";
+export * from "./captions.js";
+
 // ── Pluggable store contract ────────────────────────────────────────
 
 export interface BrainStore {
