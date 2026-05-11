@@ -1,0 +1,56 @@
+{
+  "id": "brain",
+  "kind": "memory",
+  "uiHints": {
+    "memory.url": {
+      "label": "Brain storage URL",
+      "placeholder": "(leave empty for ~/.hanzo/brain/brain.db SQLite)",
+      "help": "Postgres URL or path. Empty → embedded SQLite single-binary mode."
+    },
+    "memory.embeddingModel": {
+      "label": "Embedding model",
+      "placeholder": "text-embedding-3-small",
+      "advanced": true
+    },
+    "memory.embeddingApiKey": {
+      "label": "Embedding API key",
+      "sensitive": true,
+      "placeholder": "sk-…",
+      "advanced": true
+    },
+    "graph.enabled": {
+      "label": "Self-wiring knowledge graph",
+      "help": "Run zero-LLM typed-link extraction on every page write (recommended)."
+    },
+    "recipes": {
+      "label": "Enabled recipes",
+      "help": "Daily ingest recipes to run. e.g. ['email', 'calendar']",
+      "advanced": true
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "memory": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "url": { "type": "string" },
+          "embeddingModel": { "type": "string" },
+          "embeddingApiKey": { "type": "string" },
+          "dataDir": { "type": "string" }
+        }
+      },
+      "graph": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": { "enabled": { "type": "boolean", "default": true } }
+      },
+      "recipes": {
+        "type": "array",
+        "items": { "type": "string" }
+      }
+    }
+  }
+}

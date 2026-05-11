@@ -1,0 +1,17 @@
+{
+  "id": "graph-links",
+  "kind": "memory",
+  "uiHints": {
+    "enabled": {
+      "label": "Enable typed-link extraction",
+      "help": "Self-wiring knowledge graph — emits attended/works_at/invested_in/founded/advises edges on every page write. Zero LLM calls."
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "enabled": { "type": "boolean", "default": true }
+    }
+  }
+}

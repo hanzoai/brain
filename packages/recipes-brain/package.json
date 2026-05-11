@@ -1,0 +1,20 @@
+{
+  "name": "@hanzo/bot-recipes-brain",
+  "version": "1.4.2",
+  "private": true,
+  "description": "Hanzo Brain ingest recipes — email, calendar, slack, X, notion, … with swipe-to-reply.",
+  "files": [
+    "index.ts",
+    "recipes/"
+  ],
+  "type": "module",
+  "main": "./index.ts",
+  "peerDependencies": {
+    "yaml": "^2.8.2"
+  },
+  "openclaw": {
+    "extensions": [
+      "./index.ts"
+    ]
+  }
+}
