@@ -13,13 +13,21 @@ Drop markdown into `~/.hanzo/workspace/`. Edges auto-extract (zero LLM). Facts q
                        │   • cache/  • logs/      │
                        └─────────────┬────────────┘
                                      │
-            ┌──────────────┬─────────┴────────┬──────────────┐
-            ▼              ▼                  ▼              ▼
-       hanzoai/bot   hanzoai/python-sdk   hanzoai/mcp    hanzoai/bot-go
-       (TS — runtime  (Python — hanzo-    (Rust —        (Go — single
-        canonical;     memory pkg ports    rust/src/      static binary,
-        OpenClaw fork) graph_links +       brain crate)   pure-Go SQLite)
-                       recipes)
+                            hanzoai/node (Rust host)
+                       ┌────────────┴────────────┐
+                       │ hanzo-libs/hanzo-brain  │
+                       │  + hanzo-consensus      │
+                       │  + hanzo-zap (transport)│
+                       │  + hanzo-pqc / -machine │
+                       │  + hanzo-db-sqlite      │
+                       └────────────┬────────────┘
+                                    │
+   ┌──────────────┬──────────────┬──┴───────────┬───────────────┐
+   ▼              ▼              ▼              ▼               ▼
+ hanzoai/bot  python-sdk    hanzoai/mcp    hanzoai/bot-go   hanzoai/bot-cpp
+ (TS canon;   (hanzo-       (Rust crate    (Go single       (C++17 header-
+  OpenClaw)    memory)       hanzo-mcp::    static binary)   only, embed
+                             brain)                          in any host)
 ```
 
 ## Why a brain
@@ -162,20 +170,31 @@ CREATE TABLE facts (
 
 For multi-machine SQLite-shaped distributed semantics, we ship our own stack — **ZAP transport + hanzo-consensus + zapdb** — not libSQL/Turso. See [`hanzoai/bot-core/spec.md`](https://github.com/hanzoai/bot-core/blob/main/spec.md) for the full contract.
 
-## Fortémi parity
+## Runs on top of Hanzo Node
 
-[`PARITY.md`](PARITY.md) tracks every algorithm in
-[`fortemi/fortemi`](https://github.com/Fortemi/fortemi) and where Hanzo
-covers it — either inside this monorepo, in a sibling repo
-(`hanzo/search`, `hanzo/vector`, `hanzo/crypto`, `hanzo/age`,
-`hanzo/replicate`, …), or via a tracked planned module. Status flips
-land in that file first, then in the implementing repo.
+The brain is a first-class lib inside [`hanzoai/node`](https://github.com/hanzoai/node)
+at `hanzo-libs/hanzo-brain/`. The node owns persistence (`~/.hanzo/brain/brain.db`),
+RPC (so any agent that talks to a Hanzo Node gets `brain.recall` / `brain.search` /
+`brain.ingest` without a sidecar), and wiring into our improved threshold crypto +
+consensus stack:
 
-Every algorithm Fortémi ships is in this monorepo or wired into a sibling Hanzo repo
-through brain's pluggable traits. See [`PARITY.md`](PARITY.md) for the full
-algorithm-by-algorithm matrix.
+- [`hanzo-libs/hanzo-consensus`](https://github.com/hanzoai/node) — Quasar metastable consensus; storage quorum for multi-node brain replicas.
+- [`hanzo-libs/hanzo-zap`](https://github.com/hanzoai/node) — ZAP transport (`zap-proto`).
+- [`hanzo-libs/hanzo-pqc`](https://github.com/hanzoai/node) — post-quantum signatures on wallet-style address-bound recipient blocks.
+- [`hanzo-libs/hanzo-machine`](https://github.com/hanzoai/node) — threshold-crypto primitives backing MMPKE01 multi-recipient envelopes.
+- [`hanzo-libs/hanzo-db-sqlite`](https://github.com/hanzoai/node) — SQLite + FTS5 solo default; `zapdb` (`zap-proto/db`) at scale.
+- [`hanzoai/mpc`](https://github.com/hanzoai/mpc) — production threshold service for sealing recipient keys.
+- [`hanzoai/kms`](https://github.com/hanzoai/kms) — at-rest secret material (replicate WAL keys, embedding API tokens).
 
-Pure-CPU algorithm modules in `packages/memory/` (mirrored in Python, Go, Rust):
+Five runtimes ship the same algorithm surface, byte-equivalent on the wire:
+
+- **TypeScript** — `@hanzo/bot-memory` (this monorepo, canonical)
+- **Python** — [`hanzo-memory`](https://github.com/hanzoai/python-sdk) (`hanzo_memory.algorithms`)
+- **Go** — [`hanzoai/bot-go`](https://github.com/hanzoai/bot-go) (`pkg/brain`)
+- **Rust** — [`hanzoai/node`](https://github.com/hanzoai/node) (`hanzo-libs/hanzo-brain`) and [`hanzoai/mcp`](https://github.com/hanzoai/mcp) (`hanzo_mcp::brain::algorithms`)
+- **C++** — [`hanzoai/bot-cpp`](https://github.com/hanzoai/bot-cpp) (`include/hanzo/brain/algorithms.hpp`, header-only C++17)
+
+Pure-CPU algorithm modules in `packages/memory/` (mirrored in every runtime):
 
 - Retrieval: `fusion` (RRF / RSF / adaptive k / adaptive weights), `rerank` (MMR),
   `dedup`, `script`, `fts`, `embed` (MRL), `temporal`, `two-stage`, `federated`,
@@ -190,13 +209,16 @@ Pure-CPU algorithm modules in `packages/memory/` (mirrored in Python, Go, Rust):
 - Extraction: `extract/{index,text,email,spreadsheet,archive,exif-adapter,code,
   pdf,image,audio,video,3d,media-optimize,structured,summarizer,sprite-adapter}`
 
-Cross-runtime test counts: **121 TypeScript + 53 Python + 58 Go + 38 Rust = 270 algorithm tests** pass.
+Cross-runtime tests, all green:
+**121 TypeScript + 53 Python + 58 Go + 38 Rust (mcp) + 38 Rust (node) + 98 C++ = 406**.
 
 ## Sister repos
 
+- **[hanzoai/node](https://github.com/hanzoai/node)** — Hanzo Node (Rust). Host for brain + bot infrastructure. Owns `~/.hanzo/brain/brain.db`, RPC, ZAP transport, Quasar consensus, threshold crypto.
 - **[hanzoai/bot-core](https://github.com/hanzoai/bot-core)** — language-agnostic bot contract (channels, router, billing, brain hooks)
 - **[hanzoai/bot](https://github.com/hanzoai/bot)** — TS runtime (OpenClaw fork; 30+ channels, voice, mobile)
 - **[hanzoai/bot-go](https://github.com/hanzoai/bot-go)** — Go runtime (single binary, embeddable)
+- **[hanzoai/bot-cpp](https://github.com/hanzoai/bot-cpp)** — C++ runtime (header-only C++17, embeddable in any native host)
 - **[hanzoai/python-sdk](https://github.com/hanzoai/python-sdk)** — Python (hanzo-memory pkg)
 - **[hanzoai/mcp](https://github.com/hanzoai/mcp)** — TS + Rust + Go MCP server with the 13 HIP-0300 tools + brain tools
 
