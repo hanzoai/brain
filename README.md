@@ -162,6 +162,28 @@ CREATE TABLE facts (
 
 For multi-machine SQLite-shaped distributed semantics, we ship our own stack — **ZAP transport + hanzo-consensus + zapdb** — not libSQL/Turso. See [`hanzoai/bot-core/spec.md`](https://github.com/hanzoai/bot-core/blob/main/spec.md) for the full contract.
 
+## Fortémi parity
+
+[`PARITY.md`](PARITY.md) tracks every algorithm in
+[`fortemi/fortemi`](https://github.com/Fortemi/fortemi) and where Hanzo
+covers it — either inside this monorepo, in a sibling repo
+(`hanzo/search`, `hanzo/vector`, `hanzo/crypto`, `hanzo/age`,
+`hanzo/replicate`, …), or via a tracked planned module. Status flips
+land in that file first, then in the implementing repo.
+
+Currently landed pure-CPU algorithm modules under `packages/memory/`:
+
+- **fusion.ts** — RRF (k=20 BEIR-tuned default), RSF, adaptive RRF k, adaptive FTS/semantic weights
+- **rerank.ts** — Maximal Marginal Relevance (Carbonell & Goldstein 1998)
+- **dedup.ts** — chunk-aware deduplication (best chunk per chain)
+- **script.ts** — Unicode script detection (Latin / CJK / emoji / Cyrillic / Arabic / Hebrew / Greek / Devanagari)
+- **embed.ts** — embedding model registry, asymmetric E5 prefixes, Matryoshka truncation, coarse-dim picker
+- **temporal.ts** — UUIDv7 floor/ceiling, named ranges (today / this_week / this_month / …)
+- **captions.ts** — WebVTT / SRT / RTTM renderers (multi-speaker aware)
+
+All exposed from `@hanzo/bot-memory` and exercised by 21 unit tests in
+`packages/memory/algorithms.test.ts`.
+
 ## Sister repos
 
 - **[hanzoai/bot-core](https://github.com/hanzoai/bot-core)** — language-agnostic bot contract (channels, router, billing, brain hooks)
