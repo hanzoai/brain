@@ -1,0 +1,22 @@
+{
+  "name": "@hanzo/bot-memory",
+  "version": "1.4.2",
+  "private": true,
+  "description": "Hanzo Brain memory layer — pluggable BrainStore contract, SQLite default. Schema: pages, edges, facts, FTS5.",
+  "type": "module",
+  "main": "./index.ts",
+  "devDependencies": {
+    "vitest": "^2.1.0"
+  },
+  "peerDependencies": {
+    "@hanzo/bot-graph-links": "*"
+  },
+  "optionalDependencies": {
+    "better-sqlite3": "^11.5.0"
+  },
+  "openclaw": {
+    "extensions": [
+      "./index.ts"
+    ]
+  }
+}

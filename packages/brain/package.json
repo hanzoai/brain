@@ -1,0 +1,17 @@
+{
+  "name": "@hanzo/bot-brain",
+  "version": "1.4.2",
+  "private": true,
+  "description": "Hanzo Brain meta-pack — gbrain-equivalent on top of Hanzo Bot. Single binary, single config.",
+  "type": "module",
+  "main": "./index.ts",
+  "peerDependencies": {
+    "@hanzo/bot-graph-links": "*",
+    "@hanzo/bot-memory": "*"
+  },
+  "openclaw": {
+    "extensions": [
+      "./index.ts"
+    ]
+  }
+}
