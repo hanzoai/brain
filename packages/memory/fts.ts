@@ -2,8 +2,6 @@
  * Full-text-search helpers — feature-flag matrix, CJK bigrams, emoji
  * trigrams, and websearch_to_tsquery semantics for backends that don't
  * have it natively (SQLite FTS5).
- *
- * Fortemi parity: matric-search/src/fts_flags.rs, hybrid.rs CJK routing.
  */
 
 export interface FtsFeatureFlags {
