@@ -15,11 +15,10 @@ Drop markdown into `~/.hanzo/workspace/`. Edges auto-extract (zero LLM). Facts q
                                      │
                             hanzoai/node (Rust host)
                        ┌────────────┴────────────┐
-                       │ hanzo-libs/hanzo-brain  │
-                       │  + hanzo-consensus      │
-                       │  + hanzo-zap (transport)│
-                       │  + hanzo-pqc / -machine │
-                       │  + hanzo-db-sqlite      │
+                       │  brain crate + consensus│
+                       │  + ZAP + PQC + threshold│
+                       │  + SQLite default       │
+                       │  • chain: hanzonet/*    │
                        └────────────┬────────────┘
                                     │
    ┌──────────────┬──────────────┬──┴───────────┬───────────────┐
@@ -168,23 +167,33 @@ CREATE TABLE facts (
 | `vfs` | S3 streaming block FS, unlimited size | [`hanzoai/vfs`](https://github.com/hanzoai/vfs) |
 | `postgres` | multi-tenant team | sibling pkg |
 
-For multi-machine SQLite-shaped distributed semantics, we ship our own stack — **ZAP transport + hanzo-consensus + zapdb** — not libSQL/Turso. See [`hanzoai/bot-core/spec.md`](https://github.com/hanzoai/bot-core/blob/main/spec.md) for the full contract.
+For multi-machine SQLite-shaped distributed semantics, we ship our own stack — **ZAP transport + Quasar consensus + zapdb**, inherited from the [`hanzonet`](https://github.com/hanzonet) chain layer — not libSQL/Turso. See [`hanzoai/bot-core/spec.md`](https://github.com/hanzoai/bot-core/blob/main/spec.md) for the full contract.
 
-## Runs on top of Hanzo Node
+## Hosts and chain
 
-The brain is a first-class lib inside [`hanzoai/node`](https://github.com/hanzoai/node)
-at `hanzo-libs/hanzo-brain/`. The node owns persistence (`~/.hanzo/brain/brain.db`),
-RPC (so any agent that talks to a Hanzo Node gets `brain.recall` / `brain.search` /
-`brain.ingest` without a sidecar), and wiring into our improved threshold crypto +
-consensus stack:
+The brain is a first-class crate inside [`hanzoai/node`](https://github.com/hanzoai/node).
+The node owns persistence (`~/.hanzo/brain/brain.db`), RPC (so any agent that
+talks to a Hanzo Node gets `brain.recall` / `brain.search` / `brain.ingest`
+without a sidecar), and inherits the chain layer from
+[`hanzonet`](https://github.com/hanzonet) — Hanzo Network, the decentralized
+AI compute chain:
 
-- [`hanzo-libs/hanzo-consensus`](https://github.com/hanzoai/node) — Quasar metastable consensus; storage quorum for multi-node brain replicas.
-- [`hanzo-libs/hanzo-zap`](https://github.com/hanzoai/node) — ZAP transport (`zap-proto`).
-- [`hanzo-libs/hanzo-pqc`](https://github.com/hanzoai/node) — post-quantum signatures on wallet-style address-bound recipient blocks.
-- [`hanzo-libs/hanzo-machine`](https://github.com/hanzoai/node) — threshold-crypto primitives backing MMPKE01 multi-recipient envelopes.
-- [`hanzo-libs/hanzo-db-sqlite`](https://github.com/hanzoai/node) — SQLite + FTS5 solo default; `zapdb` (`zap-proto/db`) at scale.
-- [`hanzoai/mpc`](https://github.com/hanzoai/mpc) — production threshold service for sealing recipient keys.
-- [`hanzoai/kms`](https://github.com/hanzoai/kms) — at-rest secret material (replicate WAL keys, embedding API tokens).
+| Layer | Lives in |
+|---|---|
+| Brain crate (Rust) | `hanzoai/node` workspace member (and `hanzoai/mcp` mirror for standalone MCP server use) |
+| Chain genesis / validator coord | [`hanzonet/genesis`](https://github.com/hanzonet/genesis) |
+| Block explorer | [`hanzonet/explore`](https://github.com/hanzonet/explore) |
+| Bridge (MPC + privacy Teleport) | [`hanzonet/bridge`](https://github.com/hanzonet/bridge) |
+| DEX (AMM) | [`hanzonet/exchange`](https://github.com/hanzonet/exchange) |
+| Faucet | [`hanzonet/faucet`](https://github.com/hanzonet/faucet) |
+| Wallet | [`hanzonet/wallet`](https://github.com/hanzonet/wallet) |
+| Threshold-crypto service | [`hanzoai/mpc`](https://github.com/hanzoai/mpc) |
+| Secrets / KMS | [`hanzoai/kms`](https://github.com/hanzoai/kms) |
+
+The Quasar consensus, ZAP transport, PQC signatures, threshold-crypto wraps,
+and SQLite/zapdb storage that the brain relies on are workspace crates inside
+the node and aren't separately addressable repos — the chain surface that
+*is* separately addressable lives under [`hanzonet`](https://github.com/hanzonet).
 
 Five runtimes ship the same algorithm surface, byte-equivalent on the wire:
 
@@ -215,6 +224,7 @@ Cross-runtime tests, all green:
 ## Sister repos
 
 - **[hanzoai/node](https://github.com/hanzoai/node)** — Hanzo Node (Rust). Host for brain + bot infrastructure. Owns `~/.hanzo/brain/brain.db`, RPC, ZAP transport, Quasar consensus, threshold crypto.
+- **[hanzonet](https://github.com/hanzonet)** — Hanzo Network. Chain layer: `genesis`, `explore`, `bridge`, `exchange`, `faucet`, `wallet`.
 - **[hanzoai/bot-core](https://github.com/hanzoai/bot-core)** — language-agnostic bot contract (channels, router, billing, brain hooks)
 - **[hanzoai/bot](https://github.com/hanzoai/bot)** — TS runtime (OpenClaw fork; 30+ channels, voice, mobile)
 - **[hanzoai/bot-go](https://github.com/hanzoai/bot-go)** — Go runtime (single binary, embeddable)
