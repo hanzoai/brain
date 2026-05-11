@@ -33,13 +33,45 @@
 import type { Edge } from "@hanzo/bot-graph-links";
 
 // ── Algorithm modules (fortemi parity, see PARITY.md) ──────────────────
+// Retrieval
 export * from "./fusion.js";
 export * from "./rerank.js";
 export * from "./dedup.js";
 export * from "./script.js";
+export * from "./fts.js";
 export * from "./embed.js";
+export * from "./two-stage.js";
+export * from "./federated.js";
+export * from "./multi-memory.js";
+export * from "./filters.js";
 export * from "./temporal.js";
+export * from "./spatial.js";
 export * from "./captions.js";
+export * from "./sprite.js";
+export * from "./range.js";
+export * from "./tus.js";
+// Graph / knowledge
+export * from "./graph.js";
+export * from "./skos.js";
+export * from "./fair.js";
+export * from "./doc-types.js";
+// Operational
+export * from "./hardware.js";
+export * from "./circuit-breaker.js";
+export * from "./retry.js";
+export * from "./tokenizer.js";
+export * from "./events.js";
+export * from "./eval.js";
+// Crypto
+export * from "./address.js";
+export * from "./mmpke01.js";
+// Adapters / extraction
+export * from "./exif.js";
+export * from "./email.js";
+export * from "./code-ast.js";
+// Inference + extraction registries
+export * as Inference from "./inference/index.js";
+export * as Extract from "./extract/index.js";
 
 // ── Pluggable store contract ────────────────────────────────────────
 

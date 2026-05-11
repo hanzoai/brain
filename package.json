@@ -18,5 +18,8 @@
     "typecheck": "pnpm -r typecheck",
     "clean": "pnpm -r clean"
   },
-  "packageManager": "pnpm@9.0.0"
+  "packageManager": "pnpm@9.0.0",
+  "dependencies": {
+    "@noble/hashes": "^2.2.0"
+  }
 }

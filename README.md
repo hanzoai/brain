@@ -171,18 +171,26 @@ covers it — either inside this monorepo, in a sibling repo
 `hanzo/replicate`, …), or via a tracked planned module. Status flips
 land in that file first, then in the implementing repo.
 
-Currently landed pure-CPU algorithm modules under `packages/memory/`:
+Every algorithm Fortémi ships is in this monorepo or wired into a sibling Hanzo repo
+through brain's pluggable traits. See [`PARITY.md`](PARITY.md) for the full
+algorithm-by-algorithm matrix.
 
-- **fusion.ts** — RRF (k=20 BEIR-tuned default), RSF, adaptive RRF k, adaptive FTS/semantic weights
-- **rerank.ts** — Maximal Marginal Relevance (Carbonell & Goldstein 1998)
-- **dedup.ts** — chunk-aware deduplication (best chunk per chain)
-- **script.ts** — Unicode script detection (Latin / CJK / emoji / Cyrillic / Arabic / Hebrew / Greek / Devanagari)
-- **embed.ts** — embedding model registry, asymmetric E5 prefixes, Matryoshka truncation, coarse-dim picker
-- **temporal.ts** — UUIDv7 floor/ceiling, named ranges (today / this_week / this_month / …)
-- **captions.ts** — WebVTT / SRT / RTTM renderers (multi-speaker aware)
+Pure-CPU algorithm modules in `packages/memory/` (mirrored in Python, Go, Rust):
 
-All exposed from `@hanzo/bot-memory` and exercised by 21 unit tests in
-`packages/memory/algorithms.test.ts`.
+- Retrieval: `fusion` (RRF / RSF / adaptive k / adaptive weights), `rerank` (MMR),
+  `dedup`, `script`, `fts`, `embed` (MRL), `temporal`, `two-stage`, `federated`,
+  `filters`, `multi-memory`
+- Knowledge: `graph` (SNN / PFNET / Louvain), `skos`, `fair`, `doc-types`,
+  `code-ast`, `email`, `exif`, `captions`, `sprite`
+- Operational: `events`, `tokenizer`, `eval`, `hardware`, `circuit-breaker`,
+  `retry`, `range`, `tus`, `spatial`
+- Crypto: `address` (wallet-style ids), `mmpke01` (multi-recipient envelope)
+- Inference: `inference/{index,slug,capabilities,runtime-config,mock,few-shot,
+  refinement,link-types,vision,transcription,diarization,gliner}`
+- Extraction: `extract/{index,text,email,spreadsheet,archive,exif-adapter,code,
+  pdf,image,audio,video,3d,media-optimize,structured,summarizer,sprite-adapter}`
+
+Cross-runtime test counts: **121 TypeScript + 53 Python + 58 Go + 38 Rust = 270 algorithm tests** pass.
 
 ## Sister repos
 
