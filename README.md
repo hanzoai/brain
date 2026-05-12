@@ -23,7 +23,7 @@ Drop markdown into `~/.hanzo/workspace/`. Edges auto-extract (zero LLM). Facts q
                                     │
    ┌──────────────┬──────────────┬──┴───────────┬───────────────┐
    ▼              ▼              ▼              ▼               ▼
- hanzoai/bot  python-sdk    hanzoai/mcp    hanzobot/go   hanzobot/cpp
+ hanzobot/ts  python-sdk    hanzoai/mcp    hanzobot/go   hanzobot/cpp
  (TS canon;   (hanzo-       (Rust crate    (Go single       (C++17 header-
   OpenClaw)    memory)       hanzo-mcp::    static binary)   only, embed
                              brain)                          in any host)
@@ -226,7 +226,7 @@ Cross-runtime tests, all green:
 - **[hanzoai/node](https://github.com/hanzoai/node)** — Hanzo Node (Rust). Host for brain + bot infrastructure. Owns `~/.hanzo/brain/brain.db`, RPC, ZAP transport, Quasar consensus, threshold crypto.
 - **[hanzonet](https://github.com/hanzonet)** — Hanzo Network. Chain layer: `genesis`, `explore`, `bridge`, `exchange`, `faucet`, `wallet`.
 - **[hanzobot/core](https://github.com/hanzobot/core)** — language-agnostic bot contract (channels, router, billing, brain hooks)
-- **[hanzoai/bot](https://github.com/hanzoai/bot)** — TS runtime (OpenClaw fork; 30+ channels, voice, mobile)
+- **[hanzobot/ts](https://github.com/hanzobot/ts)** — TS runtime (OpenClaw fork; 30+ channels, voice, mobile). hanzoai/bot is the wrapper / SDK entry point.
 - **[hanzobot/go](https://github.com/hanzobot/go)** — Go runtime (single binary, embeddable)
 - **[hanzobot/cpp](https://github.com/hanzobot/cpp)** — C++ runtime (header-only C++17, embeddable in any native host)
 - **[hanzoai/python-sdk](https://github.com/hanzoai/python-sdk)** — Python (hanzo-memory pkg)
