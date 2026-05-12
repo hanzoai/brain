@@ -23,7 +23,7 @@ Drop markdown into `~/.hanzo/workspace/`. Edges auto-extract (zero LLM). Facts q
                                     │
    ┌──────────────┬──────────────┬──┴───────────┬───────────────┐
    ▼              ▼              ▼              ▼               ▼
- hanzoai/bot  python-sdk    hanzoai/mcp    hanzoai/bot-go   hanzoai/bot-cpp
+ hanzoai/bot  python-sdk    hanzoai/mcp    hanzobot/go   hanzobot/cpp
  (TS canon;   (hanzo-       (Rust crate    (Go single       (C++17 header-
   OpenClaw)    memory)       hanzo-mcp::    static binary)   only, embed
                              brain)                          in any host)
@@ -62,7 +62,7 @@ enabled = true
 ## Install (Go — single static binary)
 
 ```bash
-go install github.com/hanzoai/bot-go/cmd/hanzo-bot@latest
+go install github.com/hanzobot/go/cmd/hanzo-bot@latest
 
 hanzo-bot brain init                       # opens ~/.hanzo/brain/brain.db
 hanzo-bot brain ingest <file.md>           # ingest + auto-extract typed edges
@@ -167,7 +167,7 @@ CREATE TABLE facts (
 | `vfs` | S3 streaming block FS, unlimited size | [`hanzoai/vfs`](https://github.com/hanzoai/vfs) |
 | `postgres` | multi-tenant team | sibling pkg |
 
-For multi-machine SQLite-shaped distributed semantics, we ship our own stack — **ZAP transport + Quasar consensus + zapdb**, inherited from the [`hanzonet`](https://github.com/hanzonet) chain layer — not libSQL/Turso. See [`hanzoai/bot-core/spec.md`](https://github.com/hanzoai/bot-core/blob/main/spec.md) for the full contract.
+For multi-machine SQLite-shaped distributed semantics, we ship our own stack — **ZAP transport + Quasar consensus + zapdb**, inherited from the [`hanzonet`](https://github.com/hanzonet) chain layer — not libSQL/Turso. See [`hanzobot/core/spec.md`](https://github.com/hanzobot/core/blob/main/spec.md) for the full contract.
 
 ## Hosts and chain
 
@@ -199,9 +199,9 @@ Five runtimes ship the same algorithm surface, byte-equivalent on the wire:
 
 - **TypeScript** — `@hanzo/bot-memory` (this monorepo, canonical)
 - **Python** — [`hanzo-memory`](https://github.com/hanzoai/python-sdk) (`hanzo_memory.algorithms`)
-- **Go** — [`hanzoai/bot-go`](https://github.com/hanzoai/bot-go) (`pkg/brain`)
+- **Go** — [`hanzobot/go`](https://github.com/hanzobot/go) (`pkg/brain`)
 - **Rust** — [`hanzoai/node`](https://github.com/hanzoai/node) (`hanzo-brain` workspace member) and [`hanzoai/mcp`](https://github.com/hanzoai/mcp) (`hanzo_mcp::brain::algorithms`)
-- **C++** — [`hanzoai/bot-cpp`](https://github.com/hanzoai/bot-cpp) (`include/hanzo/brain/algorithms.hpp`, header-only C++17)
+- **C++** — [`hanzobot/cpp`](https://github.com/hanzobot/cpp) (`include/hanzo/brain/algorithms.hpp`, header-only C++17)
 
 Pure-CPU algorithm modules in `packages/memory/` (mirrored in every runtime):
 
@@ -225,10 +225,10 @@ Cross-runtime tests, all green:
 
 - **[hanzoai/node](https://github.com/hanzoai/node)** — Hanzo Node (Rust). Host for brain + bot infrastructure. Owns `~/.hanzo/brain/brain.db`, RPC, ZAP transport, Quasar consensus, threshold crypto.
 - **[hanzonet](https://github.com/hanzonet)** — Hanzo Network. Chain layer: `genesis`, `explore`, `bridge`, `exchange`, `faucet`, `wallet`.
-- **[hanzoai/bot-core](https://github.com/hanzoai/bot-core)** — language-agnostic bot contract (channels, router, billing, brain hooks)
+- **[hanzobot/core](https://github.com/hanzobot/core)** — language-agnostic bot contract (channels, router, billing, brain hooks)
 - **[hanzoai/bot](https://github.com/hanzoai/bot)** — TS runtime (OpenClaw fork; 30+ channels, voice, mobile)
-- **[hanzoai/bot-go](https://github.com/hanzoai/bot-go)** — Go runtime (single binary, embeddable)
-- **[hanzoai/bot-cpp](https://github.com/hanzoai/bot-cpp)** — C++ runtime (header-only C++17, embeddable in any native host)
+- **[hanzobot/go](https://github.com/hanzobot/go)** — Go runtime (single binary, embeddable)
+- **[hanzobot/cpp](https://github.com/hanzobot/cpp)** — C++ runtime (header-only C++17, embeddable in any native host)
 - **[hanzoai/python-sdk](https://github.com/hanzoai/python-sdk)** — Python (hanzo-memory pkg)
 - **[hanzoai/mcp](https://github.com/hanzoai/mcp)** — TS + Rust + Go MCP server with the 13 HIP-0300 tools + brain tools
 
