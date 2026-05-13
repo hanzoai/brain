@@ -11,8 +11,18 @@ package brain
 
 import (
 	"context"
+	"errors"
 	"io"
 	"time"
+)
+
+// Typed errors. Callers branch via errors.Is.
+var (
+	ErrDocNotFound       = errors.New("brain: document not found")
+	ErrRecipeNotFound    = errors.New("brain: recipe not found")
+	ErrRecipeArgsInvalid = errors.New("brain: recipe args failed schema validation")
+	ErrRecipeTimeout     = errors.New("brain: recipe execution exceeded MaxDurationSeconds")
+	ErrRecipeRejected    = errors.New("brain: recipe rejected by policy")
 )
 
 // Brain is the knowledge-graph surface: ingest documents, query
@@ -56,10 +66,38 @@ type Brain interface {
 	// the stream. Useful for keeping derived caches fresh.
 	Watch(ctx context.Context, filter WatchFilter) (<-chan ChangeEvent, error)
 
-	// RunRecipe executes a named recipe (yaml-defined workflow) against
-	// the brain. Recipes live in ~/.hanzo/brain/recipes/ and chain
-	// queries + transformations into a single named operation.
-	RunRecipe(ctx context.Context, name string, args map[string]any) (*RecipeResult, error)
+	// ListRecipes enumerates the recipes the brain can run, with each
+	// recipe's input JSON Schema. Callers introspect the schema before
+	// constructing a RecipeRequest; RunRecipe validates against the
+	// same schema server-side, so this is for discovery + tooling, not
+	// authority.
+	ListRecipes(ctx context.Context) ([]RecipeDescription, error)
+
+	// DescribeRecipe returns one recipe's metadata + input schema.
+	// ErrRecipeNotFound on miss.
+	DescribeRecipe(ctx context.Context, name string) (*RecipeDescription, error)
+
+	// RunRecipe executes a named recipe (yaml-defined workflow).
+	//
+	// Validation contract (the implementation MUST enforce all):
+	//   - Recipe must exist (ErrRecipeNotFound) and be enabled for the
+	//     caller's org.
+	//   - Args MUST validate against the recipe's input JSON Schema
+	//     (ErrRecipeArgsInvalid). The wrapped *RecipeValidationError
+	//     names the offending field path + JSON Schema keyword.
+	//   - Args carrying file paths, URLs, or shell-fragments MUST go
+	//     through the recipe's allow-list — recipes that touch the
+	//     filesystem declare a `path_allow` regex; the impl rejects
+	//     args that fail this regex with ErrRecipeRejected.
+	//   - MaxDurationSeconds is mandatory and bounded by the recipe's
+	//     declared upper limit. Exceeding it returns ErrRecipeTimeout.
+	//   - IdempotencyKey: same key + canonical(Name, Args) returns the
+	//     cached RecipeResult.
+	//
+	// Args is map[string]any to keep recipe definitions extensible at
+	// the data plane, but the schema-validation step turns it into a
+	// typed surface from the caller's perspective.
+	RunRecipe(ctx context.Context, req RecipeRequest) (*RecipeResult, error)
 
 	// Close releases the underlying SQLite handle.
 	Close() error
@@ -154,12 +192,63 @@ type ChangeEvent struct {
 	At   time.Time
 }
 
+// RecipeRequest is the typed envelope for RunRecipe.
+type RecipeRequest struct {
+	Name string
+	// Args must validate against the recipe's input JSON Schema.
+	Args map[string]any
+	// MaxDurationSeconds caps execution; recipes declare an upper
+	// bound and the impl rejects values above it. Zero is invalid —
+	// callers MUST pick a budget.
+	MaxDurationSeconds int
+	// IdempotencyKey lets safe retries replay the cached result.
+	// Optional but recommended for write-heavy recipes.
+	IdempotencyKey string
+}
+
+// RecipeDescription is the introspection record returned by
+// ListRecipes / DescribeRecipe.
+type RecipeDescription struct {
+	Name        string
+	Description string
+	// InputSchema is the recipe's JSON Schema (draft 2020-12) for
+	// Args. Implementations carry it as a parsed JSON object rather
+	// than a raw string so callers can introspect properties.
+	InputSchema map[string]any
+	// OutputShape describes the recipe's RecipeResult.Output keys.
+	OutputShape map[string]any
+	// MaxDurationSecondsLimit is the recipe's declared upper bound
+	// for RecipeRequest.MaxDurationSeconds.
+	MaxDurationSecondsLimit int
+	// SideEffects flags the kinds of work a recipe performs: fs_read |
+	// fs_write | network | shell | db_write. Callers can surface this
+	// at confirm-time before invoking.
+	SideEffects []string
+	UpdatedAt   time.Time
+}
+
+// RecipeValidationError details a schema validation failure.
+type RecipeValidationError struct {
+	// FieldPath is the JSON Pointer to the offending field
+	// (e.g. "/args/path").
+	FieldPath string
+	// Keyword is the JSON Schema keyword that rejected the value
+	// (type, required, pattern, enum, ...).
+	Keyword string
+	// Message is a human-readable detail line.
+	Message string
+}
+
+func (e *RecipeValidationError) Error() string {
+	return "brain: recipe arg " + e.FieldPath + ": " + e.Message
+}
+
 // RecipeResult is the return of RunRecipe.
 type RecipeResult struct {
 	Name      string
 	Status    string // ok | error
 	// Output is the recipe's structured result. Shape is recipe-
-	// specific.
+	// specific; see RecipeDescription.OutputShape for keys.
 	Output    map[string]any
 	StartedAt time.Time
 	FinishedAt time.Time
