@@ -1,5 +1,50 @@
 # brain
 
+Memory + RAG for the Hanzo platform. A single SQLite file that compounds knowledge across every channel, agent, and runtime.
+
+[![Status](https://img.shields.io/badge/status-beta-blue)]()
+[![License](https://img.shields.io/badge/license-MIT-blue)]()
+
+## Quick start
+
+```bash
+npm install -g @hanzo/bot
+hanzo-bot serve
+```
+
+Drop markdown into `~/.hanzo/workspace/`. Edges auto-extract (zero LLM). Facts queryable via `mcp`.
+
+## What this is
+
+`brain` is the canonical memory + RAG layer for the Hanzo platform. One SQLite file at `~/.hanzo/brain/brain.db` is the source of truth, readable from every Hanzo runtime — TS, Python, Rust, Go. Hybrid search (FTS5 + vector + RRF fusion), self-wiring graph (regex + role inference, no LLM calls), facts table, recipes (daily-life YAML automations). Pluggable storage: SQLite default; register Qdrant, Meilisearch, ZapDB, PostgreSQL, `replicate`, or `vfs` as needed. Go rewrite in flight per HIP-0106 Phase 1.5.
+
+## Specs
+
+Implements:
+- HIP-0106 Unified Cloud Binary (brain subsystem — Phase 1.5)
+
+## Architecture
+
+```
+                   ~/.hanzo/brain/
+                   |  brain.db (SQLite)
+                   |  workspace/ (md)
+                   |  recipes/ (yaml)
+                   +-- cache/, logs/
+                              |
+              +-------+-------+-------+-------+
+              |       |       |       |       |
+         hanzobot/  python- hanzoai/  bot-go  bot-cpp
+            ts      sdk      mcp    (Go        (header-
+        (TS canon)  (hanzo-  (Rust   binary)    only,
+                    memory)  crate)             embed)
+```
+
+
+---
+
+# brain
+
 > The Hanzo Brain. Single binary brain that compounds knowledge across every channel, every agent, every runtime.
 
 Drop markdown into `~/.hanzo/workspace/`. Edges auto-extract (zero LLM). Facts queryable via MCP. One SQLite file at `~/.hanzo/brain/brain.db`. Same file readable by every Hanzo runtime — TS, Python, Rust, Go.
