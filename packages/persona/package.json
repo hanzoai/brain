@@ -1,0 +1,12 @@
+{
+  "name": "@hanzo/bot-persona",
+  "version": "1.4.2",
+  "description": "Attach a PERSONA.md to the Hanzo Brain — one profile, validated once, readable from every runtime.",
+  "type": "module",
+  "main": "./index.ts",
+  "license": "MIT",
+  "peerDependencies": {
+    "@hanzo/persona": "^1.0.1",
+    "yaml": "^2.8.2"
+  }
+}

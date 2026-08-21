@@ -7,6 +7,9 @@
       "dependencies": {
         "@noble/hashes": "^2.2.0",
       },
+      "devDependencies": {
+        "yaml": "^2.9.0",
+      },
     },
     "packages/brain": {
       "name": "@hanzo/bot-brain",
@@ -14,6 +17,7 @@
       "peerDependencies": {
         "@hanzo/bot-graph-links": "*",
         "@hanzo/bot-memory": "*",
+        "@hanzo/bot-persona": "^1.4.2",
       },
     },
     "packages/graph-links": {
@@ -25,7 +29,7 @@
     },
     "packages/memory": {
       "name": "@hanzo/bot-memory",
-      "version": "1.5.0",
+      "version": "2.0.0",
       "dependencies": {
         "@noble/hashes": "^1.4.0",
       },
@@ -37,6 +41,14 @@
       },
       "peerDependencies": {
         "@hanzo/bot-graph-links": "*",
+      },
+    },
+    "packages/persona": {
+      "name": "@hanzo/bot-persona",
+      "version": "1.4.2",
+      "peerDependencies": {
+        "@hanzo/persona": "^1.0.1",
+        "yaml": "^2.8.2",
       },
     },
     "packages/recipes-brain": {
@@ -100,7 +112,11 @@
 
     "@hanzo/bot-memory": ["@hanzo/bot-memory@workspace:packages/memory"],
 
+    "@hanzo/bot-persona": ["@hanzo/bot-persona@workspace:packages/persona"],
+
     "@hanzo/bot-recipes-brain": ["@hanzo/bot-recipes-brain@workspace:packages/recipes-brain"],
+
+    "@hanzo/persona": ["@hanzo/persona@1.0.1", "", {}, "sha512-DCnmM2UUySGgSS/ZhzxSQjzJfLPTRaW8Je389jDFCQAG7EiTN0MDkRBsHM8vstbAK3V+C+fEGb1Vkjdq/b5c9Q=="],
 
     "@jridgewell/sourcemap-codec": ["@jridgewell/sourcemap-codec@1.5.5", "", {}, "sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og=="],
 
