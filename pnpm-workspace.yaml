@@ -1,2 +1,5 @@
 packages:
   - 'packages/*'
+
+catalog:
+  '@hanzo/persona': 1.0.1
