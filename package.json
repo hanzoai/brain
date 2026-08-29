@@ -2,7 +2,7 @@
   "name": "@hanzo/brain-monorepo",
   "version": "0.1.0",
   "private": true,
-  "description": "Hanzo Brain — single binary brain across every channel, agent, runtime.",
+  "description": "Hanzo Brain \u2014 single binary brain across every channel, agent, runtime.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -20,9 +20,9 @@
   },
   "packageManager": "pnpm@11.24.0",
   "dependencies": {
-    "@noble/hashes": "^2.2.0"
+    "@noble/hashes": "catalog:"
   },
   "devDependencies": {
-    "yaml": "^2.9.0"
+    "yaml": "catalog:"
   }
 }

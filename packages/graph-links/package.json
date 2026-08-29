@@ -2,11 +2,11 @@
   "name": "@hanzo/bot-graph-links",
   "version": "1.4.2",
   "private": true,
-  "description": "Zero-LLM typed-link extractor — self-wiring knowledge graph for the Hanzo Brain",
+  "description": "Zero-LLM typed-link extractor \u2014 self-wiring knowledge graph for the Hanzo Brain",
   "type": "module",
   "main": "./index.ts",
   "devDependencies": {
-    "vitest": "^2.1.0"
+    "vitest": "catalog:"
   },
   "openclaw": {
     "extensions": [
