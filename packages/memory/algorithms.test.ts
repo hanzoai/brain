@@ -122,6 +122,21 @@ describe("embedding registry + MRL", () => {
   it("l2Normalize on zero vector is no-op", () => {
     expect(l2Normalize([0, 0, 0])).toEqual([0, 0, 0]);
   });
+
+  it("registers google/embeddinggemma-2 with revision, 8K context, L2 norm, MRL dims, and task prefixes", () => {
+    const gemma = getEmbeddingModel("google/embeddinggemma-2");
+    expect(gemma).toBeDefined();
+    expect(gemma?.revision).toBe("914f7f89142e33e77833254d9c9b90c3cef7303b");
+    expect(gemma?.dim).toBe(768);
+    expect(gemma?.mrlDims).toEqual([128, 256, 512, 768]);
+    expect(gemma?.context).toBe(8192);
+    expect(gemma?.normalization).toBe("l2");
+    expect(prefixFor(gemma!, "query", "how to search")).toBe(
+      "task: search result | query: how to search",
+    );
+    expect(prefixFor(gemma!, "passage", "doc body")).toBe("title: none | text: doc body");
+    expect(coarseDim(gemma!)).toBe(128);
+  });
 });
 
 describe("temporal UUIDv7 bounds", () => {

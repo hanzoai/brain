@@ -2,7 +2,8 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { SqliteStore } from "./sqlite.js";
+import { BrainIndexMetaMismatchError, SqliteStore } from "./sqlite.js";
+import { l2Normalize } from "./embed.js";
 
 describe("memory: SQLite (canonical default)", () => {
   let dir: string;
@@ -97,5 +98,111 @@ describe("memory: pluggability", () => {
   it("unknown backend throws with a helpful message", async () => {
     const { open } = await import("./index.js");
     await expect(open({ backend: "no-such-thing" })).rejects.toThrow(/unknown backend/);
+  });
+});
+
+describe("memory: immutable brain_index_meta validation", () => {
+  const canonicalMeta = {
+    model_id: "google/embeddinggemma-2",
+    model_revision: "914f7f89142e33e77833254d9c9b90c3cef7303b",
+    dimensions: 768,
+    normalization: "l2" as const,
+    task_prefix: "task: search result | query: ",
+  };
+
+  it("persists brain_index_meta from embeddingModel config and rejects mismatches on reopen, insert, and query", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "hanzo-brain-meta-"));
+    const dbPath = join(dir, "brain.db");
+    const store = new SqliteStore({ dbPath, embeddingModel: "google/embeddinggemma-2" });
+    try {
+      await store.init();
+    } catch (e: any) {
+      if (String(e.message).includes("neither bun:sqlite nor better-sqlite3")) {
+        await rm(dir, { recursive: true, force: true });
+        return;
+      }
+      throw e;
+    }
+
+    try {
+      const stored = store.getIndexMeta();
+      expect(stored).not.toBeNull();
+      expect(stored?.model_id).toBe(canonicalMeta.model_id);
+      expect(stored?.model_revision).toBe(canonicalMeta.model_revision);
+      expect(stored?.dimensions).toBe(768);
+      expect(stored?.normalization).toBe("l2");
+      expect(stored?.task_prefix).toBe("task: search result | query: ");
+
+      // Valid insert + query with aligned unit vector & metadata succeed.
+      const unit768 = l2Normalize(Array.from({ length: 768 }, (_, i) => i + 1));
+      await store.upsertPage("docs/gemma", "EmbeddingGemma 2 index test", {}, {
+        indexMeta: canonicalMeta,
+        embedding: unit768,
+      });
+      const hits = await store.hybridSearch("EmbeddingGemma", 5, {
+        indexMeta: canonicalMeta,
+        embedding: unit768,
+      });
+      expect(hits.length).toBeGreaterThan(0);
+
+      // Mismatched metadata on insert is rejected.
+      await expect(
+        store.upsertPage("docs/bad-dim", "mismatch", {}, {
+          indexMeta: { ...canonicalMeta, dimensions: 256 },
+        }),
+      ).rejects.toThrow(BrainIndexMetaMismatchError);
+
+      await expect(
+        store.upsertFact(
+          { subject: "docs/gemma", predicate: "revision", object: "bad" },
+          { indexMeta: { ...canonicalMeta, model_revision: "deadbeef" } },
+        ),
+      ).rejects.toThrow(BrainIndexMetaMismatchError);
+
+      // Mismatched metadata or vector shape/norm on query is rejected.
+      await expect(
+        store.hybridSearch("EmbeddingGemma", 5, {
+          indexMeta: { ...canonicalMeta, task_prefix: "query: " },
+        }),
+      ).rejects.toThrow(BrainIndexMetaMismatchError);
+
+      await expect(
+        store.hybridSearch("EmbeddingGemma", 5, {
+          indexMeta: { ...canonicalMeta, normalization: "none" },
+        }),
+      ).rejects.toThrow(BrainIndexMetaMismatchError);
+
+      await expect(
+        store.hybridSearch("EmbeddingGemma", 5, {
+          embedding: unit768.slice(0, 256),
+        }),
+      ).rejects.toThrow(BrainIndexMetaMismatchError);
+
+      await expect(
+        store.hybridSearch("EmbeddingGemma", 5, {
+          embedding: Array.from({ length: 768 }, () => 1), // unnormalized
+        }),
+      ).rejects.toThrow(BrainIndexMetaMismatchError);
+
+      // Reopening with mismatched config fails at init().
+      const badReopen = new SqliteStore({
+        dbPath,
+        embeddingModel: "google/embeddinggemma-2",
+        embeddingDimensions: 256,
+      });
+      await expect(badReopen.init()).rejects.toThrow(BrainIndexMetaMismatchError);
+
+      // Reopening with identical config succeeds.
+      const goodReopen = new SqliteStore({
+        dbPath,
+        embeddingModel: "google/embeddinggemma-2",
+      });
+      await goodReopen.init();
+      expect(goodReopen.getIndexMeta()?.model_revision).toBe(canonicalMeta.model_revision);
+      await goodReopen.close();
+    } finally {
+      await store.close();
+      await rm(dir, { recursive: true, force: true });
+    }
   });
 });

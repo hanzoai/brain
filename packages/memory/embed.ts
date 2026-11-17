@@ -17,10 +17,16 @@ export type EmbedTask = "query" | "passage" | "symmetric";
 export interface EmbeddingModel {
   /** Provider-qualified slug, e.g. "ollama:nomic-embed-text". */
   slug: string;
+  /** Pinned immutable model revision / commit SHA (when applicable). */
+  revision?: string;
   /** Native output dimension. */
   dim: number;
   /** Allowed MRL truncation sizes (sorted ascending). Includes `dim`. */
   mrlDims?: number[];
+  /** Maximum supported context length in tokens. */
+  context?: number;
+  /** Vector normalization contract. */
+  normalization?: "l2" | "none";
   /** Asymmetric models put a prefix on queries vs passages. */
   prefix?: {
     query: string;
@@ -76,6 +82,21 @@ registerEmbeddingModel({
   dim: 3072,
   mrlDims: [256, 512, 1024, 2048, 3072],
   family: "openai",
+});
+
+// google/embeddinggemma-2 — 768d, asymmetric, 8192 ctx, L2-normalized MRL.
+registerEmbeddingModel({
+  slug: "google/embeddinggemma-2",
+  revision: "914f7f89142e33e77833254d9c9b90c3cef7303b",
+  dim: 768,
+  mrlDims: [128, 256, 512, 768],
+  context: 8192,
+  normalization: "l2",
+  prefix: {
+    query: "task: search result | query: ",
+    passage: "title: none | text: ",
+  },
+  family: "gemma",
 });
 
 // ── Prefix helpers ─────────────────────────────────────────────────────

@@ -109,6 +109,10 @@ export interface MemoryConfig {
   dataDir?: string; // default ~/.hanzo/brain
   dbPath?: string; // explicit file path; overrides dataDir
   embeddingModel?: string;
+  embeddingRevision?: string;
+  embeddingDimensions?: number;
+  embeddingNormalization?: "l2" | "none";
+  embeddingTaskPrefix?: string;
   embeddingApiKey?: string;
 }
 
