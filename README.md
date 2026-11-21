@@ -1,5 +1,7 @@
 # brain
 
+[![Open in Hanzo](https://hanzo.app/badges/open-in-hanzo.svg)](https://hanzo.app/dev/open?repo=github.com/hanzoai/brain&ref=main&action=open) [![Edit with Hanzo](https://hanzo.app/badges/edit-with-hanzo.svg)](https://hanzo.app/dev/open?repo=github.com/hanzoai/brain&ref=main&action=edit)
+
 Memory + RAG for the Hanzo platform. A single SQLite file that compounds knowledge across every channel, agent, and runtime.
 
 [![Status](https://img.shields.io/badge/status-beta-blue)]()
